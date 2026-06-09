@@ -135,6 +135,56 @@
     });
   }
 
+  // ---------- VS-baselines synchronized playback ----------
+  // All 6 videos within a single .vs-grid-panel play / pause / seek as one.
+  // Each panel is independent so the 3 samples don't bleed into each other.
+  // Per-panel `suppress` flag prevents the sync handler from triggering itself.
+  gridPanels.forEach(panel => {
+    const videos = Array.from(panel.querySelectorAll('video'));
+    if(videos.length < 2) return;
+
+    let suppress = false;
+    const SEEK_THRESHOLD = 0.15;     // seconds — only resync if drift is real
+
+    function syncOthers(action, src){
+      if(suppress) return;
+      suppress = true;
+      videos.forEach(v => {
+        if(v === src) return;
+        try{
+          if(action === 'play'){
+            if(Math.abs(v.currentTime - src.currentTime) > SEEK_THRESHOLD){
+              v.currentTime = src.currentTime;
+            }
+            if(v.paused){ v.play().catch(()=>{}); }
+          }else if(action === 'pause'){
+            if(!v.paused){ v.pause(); }
+          }else if(action === 'seek'){
+            if(Math.abs(v.currentTime - src.currentTime) > SEEK_THRESHOLD){
+              v.currentTime = src.currentTime;
+            }
+          }
+        }catch(e){}
+      });
+      // release the lock on the next tick — long enough that the play/pause
+      // events fired on the followers don't re-enter syncOthers
+      setTimeout(()=>{ suppress = false; }, 40);
+    }
+
+    videos.forEach(v => {
+      v.addEventListener('play',    () => syncOthers('play',  v));
+      v.addEventListener('pause',   () => syncOthers('pause', v));
+      v.addEventListener('seeking', () => syncOthers('seek',  v));
+
+      // Audio polish: if the user unmutes one video, mute the rest so we
+      // don't get six overlapping audio tracks at once.
+      v.addEventListener('volumechange', () => {
+        if(v.muted) return;
+        videos.forEach(other => { if(other !== v) other.muted = true; });
+      });
+    });
+  });
+
   // ---------- Copy BibTeX ----------
   const copyBtn = document.getElementById('copy-bib');
   if(copyBtn){

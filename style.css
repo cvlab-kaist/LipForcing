@@ -64,10 +64,12 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
 }
 
 /* ---------- Layout ---------- */
+/* Sidebar is pinned to the viewport's left edge. The .content flex item
+   gets the rest of the row, then internally centers its constrained
+   max-width inside that remaining space. */
 .layout{
   display:flex;
   align-items:flex-start;
-  justify-content:center;
   min-height:100vh;
 }
 
@@ -126,6 +128,7 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
   flex:1; min-width:0;
   max-width: calc(var(--content-max) + 2 * var(--content-px));
   padding: 64px var(--content-px) 96px;
+  margin: 0 auto;   /* center the constrained content within the remaining row */
 }
 
 .sec{ margin-bottom:84px; scroll-margin-top:24px; }

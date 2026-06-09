@@ -426,7 +426,9 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
   width: 108%;
   margin-left: -4%;
   max-width: none;
+  max-height: 220px;        /* same cap as Pareto -> row can now actually shrink */
   object-fit: cover;
+  object-position: center;
 }
 
 @media (max-width: 820px){

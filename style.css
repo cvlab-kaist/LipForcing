@@ -796,11 +796,11 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
   line-height: 1;
 }
 .vs-tset-name{
-  font-family: var(--font-serif);
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 500;
   color: var(--accent-strong);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   line-height: 1.15;
   transition: opacity 0.16s ease, transform 0.16s ease;
 }

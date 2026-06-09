@@ -127,11 +127,11 @@
           <div class="stat-label">At inference, no CFG</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">17.6<span class="stat-unit">×</span></div>
+          <div class="stat-num">17.6<span class="stat-unit">× Speedup</span></div>
           <div class="stat-label">1.3B causal student model vs. same-scale bidirectional model</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">39.8<span class="stat-unit">×</span></div>
+          <div class="stat-num">39.8<span class="stat-unit">× Speedup</span></div>
           <div class="stat-label">14B causal student model vs. same-scale bidirectional model</div>
         </div>
       </div>
@@ -189,7 +189,7 @@
           classifier-free guidance (CFG, red) improves audio-visual sync but
           worsens reference fidelity. No-CFG (navy) shows the inverse.
           No fixed CFG scale optimizes both axes.
-          <strong>(b)</strong> An Euler-jump 2×2 factorial over schedules
+          <strong>(b)</strong> An Euler-step 2×2 factorial over schedules
           $(s_0, s_1)$ shows that mixed schedules recover most of the sync gap
           when the second step lands near $j\!=\!30$.
         </figcaption>
@@ -200,7 +200,7 @@
           Diffusion lip-sync models exhibit a <strong>CFG fidelity-sync tradeoff</strong>:
           classifier-free guidance lifts audio-visual synchronization but at the cost
           of reference fidelity, and the two regimes do not coexist at any single CFG
-          scale. To distill this into a two-step student we run an Euler-jump factorial
+          scale. To distill this into a two-step student we run an Euler-step factorial
           over $(s_0, s_1)\in\{1.0, 4.5\}^2$; the <strong>no-CFG&nbsp;→&nbsp;CFG</strong>
           schedule lands near <strong class="hl">t&thinsp;=&thinsp;0.769</strong>
           (~ODE step&nbsp;30) on the reference-leaning side of the joint
@@ -240,7 +240,7 @@
           inference at deployment. Trained this way, both Lip Forcing variants
           land on the upper-right corner of the <strong class="hl">speed–quality
           Pareto frontier</strong>: the 1.3B student reaches&nbsp;<strong>31 FPS</strong>
-          — past the 25 FPS playback rate of the test videos — while the 14B
+          — past the 25 FPS real-time threshold — while the 14B
           student delivers a&nbsp;<strong>4.7× throughput gain</strong> over
           LatentSync at comparable reference fidelity. No prior method occupies
           the upper-right region; the closest competitors trade off either

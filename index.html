@@ -389,95 +389,114 @@
       <div class="sec-label">COMPARISON</div>
       <h2 class="sec-heading">Comparison with baselines</h2>
       <p class="sec-lead">
-        Same input video and driving audio per row. Each column is a different
-        method; <strong>Ours</strong> sits right next to the input for easy
+        Pick a clip below to inspect it across all six methods. The selected
+        sample plays as a 3×2 grid; <strong>Input</strong> and
+        <strong>Ours</strong> sit in the top-left for easy side-by-side
         comparison.
       </p>
-      <p class="vs-section-hint">Scroll the row horizontally to see all six methods.</p>
 
-      <!-- Row template — each row uses same input across all baselines.
-           Column order: Input | Ours | Wav2Lip | VideoReTalking | MuseTalk | LatentSync.
-           Rows scroll horizontally when wider than the viewport. -->
-      <div class="vs-table">
-        <!-- Header (column labels) -->
-        <div class="vs-row vs-header">
-          <div class="vs-input-label">Input</div>
-          <div class="vs-cell-label vs-cell-ours">Ours</div>
-          <div class="vs-cell-label">Wav2Lip</div>
-          <div class="vs-cell-label">VideoReTalking</div>
-          <div class="vs-cell-label">MuseTalk</div>
-          <div class="vs-cell-label">LatentSync</div>
-        </div>
-
-        <!-- Row 1 -->
-        <div class="vs-row">
-          <figure class="video-frame video-landscape vs-input">
-            <video src="videos/vs/row1/input.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape vs-cell-ours">
-            <video src="videos/vs/row1/ours.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row1/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row1/videoretalking.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row1/musetalk.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row1/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-        </div>
-
-        <!-- Row 2 -->
-        <div class="vs-row">
-          <figure class="video-frame video-landscape vs-input">
-            <video src="videos/vs/row2/input.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape vs-cell-ours">
-            <video src="videos/vs/row2/ours.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row2/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row2/videoretalking.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row2/musetalk.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row2/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-        </div>
-
-        <!-- Row 3 -->
-        <div class="vs-row">
-          <figure class="video-frame video-landscape vs-input">
-            <video src="videos/vs/row3/input.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape vs-cell-ours">
-            <video src="videos/vs/row3/ours.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row3/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row3/videoretalking.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row3/musetalk.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape">
-            <video src="videos/vs/row3/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-        </div>
+      <!-- Row picker -->
+      <div class="vs-picker" role="tablist" aria-label="Choose a sample">
+        <button class="vs-pick-btn active" data-row="1" role="tab" aria-selected="true">
+          <span class="vs-pick-num">01</span><span class="vs-pick-text">Sample 1</span>
+        </button>
+        <button class="vs-pick-btn" data-row="2" role="tab" aria-selected="false">
+          <span class="vs-pick-num">02</span><span class="vs-pick-text">Sample 2</span>
+        </button>
+        <button class="vs-pick-btn" data-row="3" role="tab" aria-selected="false">
+          <span class="vs-pick-num">03</span><span class="vs-pick-text">Sample 3</span>
+        </button>
       </div>
+
+      <!-- 3×2 grid panels — one per sample, only the active one is shown.
+           Order: Input | Ours | Wav2Lip  /  VideoReTalking | MuseTalk | LatentSync -->
+      <div class="vs-stage">
+
+        <div class="vs-grid-panel" data-row="1">
+          <figure class="vs-cell vs-input">
+            <video src="videos/vs/row1/input.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Input</figcaption>
+          </figure>
+          <figure class="vs-cell vs-cell-ours">
+            <video src="videos/vs/row1/ours.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Ours (Lip Forcing)</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row1/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Wav2Lip</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row1/videoretalking.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>VideoReTalking</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row1/musetalk.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>MuseTalk</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row1/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>LatentSync</figcaption>
+          </figure>
+        </div>
+
+        <div class="vs-grid-panel" data-row="2" hidden>
+          <figure class="vs-cell vs-input">
+            <video src="videos/vs/row2/input.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Input</figcaption>
+          </figure>
+          <figure class="vs-cell vs-cell-ours">
+            <video src="videos/vs/row2/ours.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Ours (Lip Forcing)</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row2/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Wav2Lip</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row2/videoretalking.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>VideoReTalking</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row2/musetalk.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>MuseTalk</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row2/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>LatentSync</figcaption>
+          </figure>
+        </div>
+
+        <div class="vs-grid-panel" data-row="3" hidden>
+          <figure class="vs-cell vs-input">
+            <video src="videos/vs/row3/input.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Input</figcaption>
+          </figure>
+          <figure class="vs-cell vs-cell-ours">
+            <video src="videos/vs/row3/ours.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Ours (Lip Forcing)</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row3/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>Wav2Lip</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row3/videoretalking.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>VideoReTalking</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row3/musetalk.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>MuseTalk</figcaption>
+          </figure>
+          <figure class="vs-cell">
+            <video src="videos/vs/row3/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
+            <figcaption>LatentSync</figcaption>
+          </figure>
+        </div>
+
+      </div>
+
       <p class="cap">
-        Three clips from the TalkVid test set, each driven by the same
-        speaker's audio. Lip Forcing produces noticeably sharper mouth
+        TalkVid test clips. Lip Forcing produces noticeably sharper mouth
         articulation than Wav2Lip, VideoReTalking, and MuseTalk, and is
         competitive with LatentSync at <strong>~10× the throughput</strong>.
       </p>

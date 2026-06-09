@@ -604,74 +604,127 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
   border-top:1px solid var(--border-soft);
 }
 
-/* VS-baselines table — fixed-width cells so videos stay large; the row
-   scrolls horizontally inside .vs-table when it overflows the content column. */
-:root{
-  --vs-cell-w: 360px;   /* width per video cell (16:9 → ~203px tall) */
-  --vs-gap: 14px;
-}
-.vs-table{
-  display:flex; flex-direction:column; gap: 18px;
-  overflow-x: auto;
-  padding: 4px 4px 14px;
-  /* Subtle "more content this way" gradient on the right edge */
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-}
-.vs-table::-webkit-scrollbar{ height: 10px; }
-.vs-table::-webkit-scrollbar-track{ background: var(--surface-2); border-radius: 6px; }
-.vs-table::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 6px; }
-.vs-table::-webkit-scrollbar-thumb:hover{ background: var(--text-mute); }
+/* =============== VS-BASELINES — sample picker + 3×2 grid =============== */
 
-.vs-row{
-  display: grid;
-  grid-template-columns: repeat(6, var(--vs-cell-w));
-  gap: var(--vs-gap);
-  align-items: start;
-  width: max-content;       /* row hugs its content width, enabling overflow */
-  min-width: 100%;          /* but never shrink below container width */
+/* Row-picker buttons */
+.vs-picker{
+  display: flex;
+  gap: 10px;
+  margin: 6px 0 22px;
+  flex-wrap: wrap;
 }
-.vs-row .video-frame{ aspect-ratio: 16 / 9; scroll-snap-align: start; }
-
-.vs-header{
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.vs-pick-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 0.92rem;
   color: var(--text-soft);
-  align-items: end;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
-.vs-input-label, .vs-cell-label{
-  text-align: center;
-  padding: 6px 8px;
-}
-.vs-cell-label.vs-cell-ours{
+.vs-pick-btn:hover{
+  border-color: var(--accent);
   color: var(--accent-strong);
-  border-bottom: 2px solid var(--accent);
-  padding-bottom: 4px;
+  background: var(--accent-soft);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-1);
+}
+.vs-pick-btn.active{
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: white;
+  border-color: var(--accent-strong);
+  box-shadow: var(--shadow-1);
+}
+.vs-pick-num{
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+}
+.vs-pick-btn.active .vs-pick-num{ opacity: 0.92; }
+
+/* The stage that holds the 3 grid panels (only one visible at a time) */
+.vs-stage{
+  margin: 4px 0 8px;
+}
+.vs-grid-panel{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 16px;
+  animation: vsFadeIn 0.28s ease both;
+}
+.vs-grid-panel[hidden]{ display: none; }
+
+@keyframes vsFadeIn{
+  from{ opacity: 0; transform: translateY(4px); }
+  to  { opacity: 1; transform: none; }
+}
+
+/* Each cell */
+.vs-cell{
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.vs-cell:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+.vs-cell video{
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #000;
+}
+.vs-cell figcaption{
+  padding: 9px 14px;
+  font-size: 0.88rem;
+  text-align: center;
+  font-weight: 500;
+  color: var(--text-soft);
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border-top: 1px solid var(--border-soft);
+}
+
+/* Highlight modifiers */
+.vs-cell.vs-input{
+  border-color: var(--text-mute);
+}
+.vs-cell.vs-input figcaption{
+  color: var(--text);
   font-weight: 700;
 }
-.video-frame.vs-cell-ours{
+.vs-cell.vs-cell-ours{
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow-1);
 }
-.video-frame.vs-input{
-  border-color: var(--text-mute);
-  background: var(--surface-2);
+.vs-cell.vs-cell-ours figcaption{
+  color: var(--accent-strong);
+  font-weight: 700;
+  background: linear-gradient(180deg, var(--accent-soft), var(--surface));
 }
 
-/* Hint to scroll if row overflows the container */
-.vs-section-hint{
-  font-size: 0.82rem;
-  color: var(--text-mute);
-  margin-top: -10px;
-  margin-bottom: 14px;
-  display: flex; align-items: center; gap: 6px;
+/* Responsive: 2 cols on mid, 1 col on small */
+@media (max-width: 900px){
+  .vs-grid-panel{ grid-template-columns: repeat(2, 1fr); }
 }
-.vs-section-hint::before{
-  content: "↔";
-  color: var(--accent);
-  font-weight: 700;
+@media (max-width: 560px){
+  .vs-grid-panel{ grid-template-columns: 1fr; }
+  .vs-pick-btn{ padding: 8px 14px; font-size: 0.86rem; }
 }
 
 /* =============== BIBTEX =============== */

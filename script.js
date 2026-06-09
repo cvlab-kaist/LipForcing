@@ -107,6 +107,34 @@
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
   fadeTargets.forEach(t => fadeObserver.observe(t));
 
+  // ---------- VS-baselines sample picker ----------
+  const pickButtons = document.querySelectorAll('.vs-pick-btn');
+  const gridPanels  = document.querySelectorAll('.vs-grid-panel');
+  if(pickButtons.length && gridPanels.length){
+    pickButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const row = btn.dataset.row;
+        // Update buttons
+        pickButtons.forEach(b => {
+          const isActive = b.dataset.row === row;
+          b.classList.toggle('active', isActive);
+          b.setAttribute('aria-selected', String(isActive));
+        });
+        // Show/hide panels + pause videos in hidden panels
+        gridPanels.forEach(p => {
+          if(p.dataset.row === row){
+            p.removeAttribute('hidden');
+          }else{
+            p.setAttribute('hidden', '');
+            p.querySelectorAll('video').forEach(v => {
+              try{ v.pause(); }catch(e){}
+            });
+          }
+        });
+      });
+    });
+  }
+
   // ---------- Copy BibTeX ----------
   const copyBtn = document.getElementById('copy-bib');
   if(copyBtn){

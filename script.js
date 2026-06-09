@@ -107,6 +107,57 @@
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
   fadeTargets.forEach(t => fadeObserver.observe(t));
 
+  // ---------- Dual-figure lightbox (Framework + Speed vs. Quality) ----------
+  // Click either image to enlarge it as a centered overlay. Click the overlay,
+  // press Escape, or click the close button to dismiss.
+  const dualImgs = document.querySelectorAll('.dual-fig-item img');
+  if(dualImgs.length){
+    const overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = '<img alt="" /><button class="lightbox-close" aria-label="Close enlarged image">&times;</button>';
+    document.body.appendChild(overlay);
+    const lbImg   = overlay.querySelector('img');
+    const lbClose = overlay.querySelector('.lightbox-close');
+
+    function openLightbox(srcUrl, altText){
+      lbImg.src = srcUrl;
+      lbImg.alt = altText || '';
+      overlay.classList.add('visible');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(){
+      overlay.classList.remove('visible');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    dualImgs.forEach(img => {
+      img.classList.add('lightbox-trigger');
+      img.setAttribute('role', 'button');
+      img.setAttribute('tabindex', '0');
+      img.addEventListener('click', () => openLightbox(img.currentSrc || img.src, img.alt));
+      img.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          openLightbox(img.currentSrc || img.src, img.alt);
+        }
+      });
+    });
+
+    // Dismiss: click anywhere on overlay, close button, or Escape key
+    overlay.addEventListener('click', (e) => {
+      // Ignore clicks that originate on the image itself so they don't dismiss
+      if(e.target === lbImg) return;
+      closeLightbox();
+    });
+    lbClose.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && overlay.classList.contains('visible')) closeLightbox();
+    });
+  }
+
   // ---------- Preview: mouse-position-driven horizontal scroll ----------
   // The further left/right the cursor is from the strip's center, the faster
   // it pans in that direction. A small deadzone in the middle keeps it from

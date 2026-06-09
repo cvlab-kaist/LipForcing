@@ -604,34 +604,52 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
   border-top:1px solid var(--border-soft);
 }
 
-/* VS-baselines table */
+/* VS-baselines table — fixed-width cells so videos stay large; the row
+   scrolls horizontally inside .vs-table when it overflows the content column. */
+:root{
+  --vs-cell-w: 360px;   /* width per video cell (16:9 → ~203px tall) */
+  --vs-gap: 14px;
+}
 .vs-table{
-  display:flex; flex-direction:column; gap: 14px;
+  display:flex; flex-direction:column; gap: 18px;
   overflow-x: auto;
-  padding: 4px 0 8px;
+  padding: 4px 4px 14px;
+  /* Subtle "more content this way" gradient on the right edge */
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
 }
+.vs-table::-webkit-scrollbar{ height: 10px; }
+.vs-table::-webkit-scrollbar-track{ background: var(--surface-2); border-radius: 6px; }
+.vs-table::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 6px; }
+.vs-table::-webkit-scrollbar-thumb:hover{ background: var(--text-mute); }
+
 .vs-row{
-  display:grid;
-  grid-template-columns: 1.2fr repeat(5, 1fr);
-  gap: 10px;
-  align-items:center;
-  min-width: 900px;
+  display: grid;
+  grid-template-columns: repeat(6, var(--vs-cell-w));
+  gap: var(--vs-gap);
+  align-items: start;
+  width: max-content;       /* row hugs its content width, enabling overflow */
+  min-width: 100%;          /* but never shrink below container width */
 }
-.vs-row .video-frame{ aspect-ratio: 16 / 9; }
+.vs-row .video-frame{ aspect-ratio: 16 / 9; scroll-snap-align: start; }
+
 .vs-header{
-  font-size: 0.82rem;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--text-soft);
+  align-items: end;
 }
 .vs-input-label, .vs-cell-label{
-  text-align:center;
+  text-align: center;
+  padding: 6px 8px;
 }
 .vs-cell-label.vs-cell-ours{
   color: var(--accent-strong);
   border-bottom: 2px solid var(--accent);
   padding-bottom: 4px;
+  font-weight: 700;
 }
 .video-frame.vs-cell-ours{
   border-color: var(--accent);
@@ -640,6 +658,20 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
 .video-frame.vs-input{
   border-color: var(--text-mute);
   background: var(--surface-2);
+}
+
+/* Hint to scroll if row overflows the container */
+.vs-section-hint{
+  font-size: 0.82rem;
+  color: var(--text-mute);
+  margin-top: -10px;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 6px;
+}
+.vs-section-hint::before{
+  content: "↔";
+  color: var(--accent);
+  font-weight: 700;
 }
 
 /* =============== BIBTEX =============== */
@@ -720,7 +752,6 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
     border-top: 1px solid var(--border-soft);
   }
   .numbered-list{ grid-template-columns: 1fr; }
-  .vs-row{ min-width: 780px; }
 }
 @media (max-width: 720px){
   .layout{ flex-direction:column; }
@@ -748,5 +779,7 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
     white-space: normal;
     text-align: center;
   }
-  .vs-row{ min-width: 720px; }
+  /* Smaller cells on mobile so each video still fits side-by-side cleanly
+     when scrolling horizontally */
+  :root{ --vs-cell-w: 280px; }
 }

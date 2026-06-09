@@ -390,25 +390,32 @@
       <h2 class="sec-heading">Comparison with baselines</h2>
       <p class="sec-lead">
         Same input video and driving audio per row. Each column is a different
-        method.
+        method; <strong>Ours</strong> sits right next to the input for easy
+        comparison.
       </p>
+      <p class="vs-section-hint">Scroll the row horizontally to see all six methods.</p>
 
-      <!-- Row template — each row uses same input across all baselines -->
+      <!-- Row template — each row uses same input across all baselines.
+           Column order: Input | Ours | Wav2Lip | VideoReTalking | MuseTalk | LatentSync.
+           Rows scroll horizontally when wider than the viewport. -->
       <div class="vs-table">
         <!-- Header (column labels) -->
         <div class="vs-row vs-header">
           <div class="vs-input-label">Input</div>
+          <div class="vs-cell-label vs-cell-ours">Ours</div>
           <div class="vs-cell-label">Wav2Lip</div>
           <div class="vs-cell-label">VideoReTalking</div>
           <div class="vs-cell-label">MuseTalk</div>
           <div class="vs-cell-label">LatentSync</div>
-          <div class="vs-cell-label vs-cell-ours">Ours</div>
         </div>
 
         <!-- Row 1 -->
         <div class="vs-row">
           <figure class="video-frame video-landscape vs-input">
             <video src="videos/vs/row1/input.mp4" controls preload="metadata" muted loop playsinline></video>
+          </figure>
+          <figure class="video-frame video-landscape vs-cell-ours">
+            <video src="videos/vs/row1/ours.mp4" controls preload="metadata" muted loop playsinline></video>
           </figure>
           <figure class="video-frame video-landscape">
             <video src="videos/vs/row1/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
@@ -422,15 +429,15 @@
           <figure class="video-frame video-landscape">
             <video src="videos/vs/row1/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
           </figure>
-          <figure class="video-frame video-landscape vs-cell-ours">
-            <video src="videos/vs/row1/ours.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
         </div>
 
         <!-- Row 2 -->
         <div class="vs-row">
           <figure class="video-frame video-landscape vs-input">
             <video src="videos/vs/row2/input.mp4" controls preload="metadata" muted loop playsinline></video>
+          </figure>
+          <figure class="video-frame video-landscape vs-cell-ours">
+            <video src="videos/vs/row2/ours.mp4" controls preload="metadata" muted loop playsinline></video>
           </figure>
           <figure class="video-frame video-landscape">
             <video src="videos/vs/row2/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
@@ -444,15 +451,15 @@
           <figure class="video-frame video-landscape">
             <video src="videos/vs/row2/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
           </figure>
-          <figure class="video-frame video-landscape vs-cell-ours">
-            <video src="videos/vs/row2/ours.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
         </div>
 
         <!-- Row 3 -->
         <div class="vs-row">
           <figure class="video-frame video-landscape vs-input">
             <video src="videos/vs/row3/input.mp4" controls preload="metadata" muted loop playsinline></video>
+          </figure>
+          <figure class="video-frame video-landscape vs-cell-ours">
+            <video src="videos/vs/row3/ours.mp4" controls preload="metadata" muted loop playsinline></video>
           </figure>
           <figure class="video-frame video-landscape">
             <video src="videos/vs/row3/wav2lip.mp4" controls preload="metadata" muted loop playsinline></video>
@@ -465,9 +472,6 @@
           </figure>
           <figure class="video-frame video-landscape">
             <video src="videos/vs/row3/latentsync.mp4" controls preload="metadata" muted loop playsinline></video>
-          </figure>
-          <figure class="video-frame video-landscape vs-cell-ours">
-            <video src="videos/vs/row3/ours.mp4" controls preload="metadata" muted loop playsinline></video>
           </figure>
         </div>
       </div>

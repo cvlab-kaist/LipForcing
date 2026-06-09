@@ -109,10 +109,10 @@
           students at 1.3B and 14B scales. The
           <strong class="hl">1.3B student</strong> runs
           <strong>17.6×</strong> faster than its same-scale bidirectional
-          counterpart, and the <strong class="hl">14B student</strong> runs
-          <strong>39.7×</strong> faster than its teacher at comparable
-          reference fidelity — reaching <strong>31 FPS</strong> real-time on
-          a single GPU (H100).
+          counterpart, reaching <strong>31 FPS</strong> real-time on a
+          single GPU (H100), and the <strong class="hl">14B student</strong>
+          runs <strong>39.8×</strong> faster than its teacher at comparable
+          reference fidelity.
         </p>
       </div>
 
@@ -128,11 +128,11 @@
         </div>
         <div class="stat-card">
           <div class="stat-num">17.6<span class="stat-unit">×</span></div>
-          <div class="stat-label">1.3B causal student vs. same-scale bidirectional</div>
+          <div class="stat-label">1.3B causal student model vs. same-scale bidirectional model</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">39.7<span class="stat-unit">×</span></div>
-          <div class="stat-label">14B causal student vs. same-scale bidirectional</div>
+          <div class="stat-num">39.8<span class="stat-unit">×</span></div>
+          <div class="stat-label">14B causal student model vs. same-scale bidirectional model</div>
         </div>
       </div>
     </section>
@@ -203,8 +203,9 @@
           scale. To distill this into a two-step student we run an Euler-jump factorial
           over $(s_0, s_1)\in\{1.0, 4.5\}^2$; the <strong>no-CFG&nbsp;→&nbsp;CFG</strong>
           schedule lands near <strong class="hl">t&thinsp;=&thinsp;0.769</strong>
-          (~ODE step&nbsp;30) on a favorable point — reference fidelity matched to the
-          CFG=1.0 ceiling and sync within ~0.4 Sync-C of the CFG=4.5 ceiling.
+          (~ODE step&nbsp;30) on the reference-leaning side of the joint
+          reference–sync optimum — reference fidelity close to the CFG=1.0
+          ceiling and sync close to the CFG=4.5 ceiling.
           The remaining sync gap is closeable with explicit SyncNet supervision, while
           the reference cost incurred by a guided first step is not. This selects the
           <strong>operating point</strong> the student is trained to land on at
@@ -232,15 +233,15 @@
 
       <div class="text-block text-block-wide">
         <p>
-          The 14B bidirectional teacher provides velocity targets along a
-          windowed schedule (<strong>Sync-Window DMD</strong>), while the causal
+          The 14B bidirectional teacher provides score / guidance targets along
+          a windowed schedule (<strong>Sync-Window DMD</strong>), while the causal
           student uses chunk-wise sliding-window attention
-          (<code>sink=1, window=7</code>) to support autoregressive inference at
-          deployment. Trained this way, both Lip Forcing variants land on the
-          upper-right corner of the <strong class="hl">speed–quality Pareto
-          frontier</strong>: the 1.3B student reaches&nbsp;<strong>31 FPS</strong>
+          (<code>sink=1, window=6</code>, total cache 7) to support autoregressive
+          inference at deployment. Trained this way, both Lip Forcing variants
+          land on the upper-right corner of the <strong class="hl">speed–quality
+          Pareto frontier</strong>: the 1.3B student reaches&nbsp;<strong>31 FPS</strong>
           — past the 25 FPS playback rate of the test videos — while the 14B
-          student delivers a&nbsp;<strong>4.6× throughput gain</strong> over
+          student delivers a&nbsp;<strong>4.7× throughput gain</strong> over
           LatentSync at comparable reference fidelity. No prior method occupies
           the upper-right region; the closest competitors trade off either
           quality (Wav2Lip, MuseTalk) or speed (LatentSync, OmniAvatar).

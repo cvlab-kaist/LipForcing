@@ -36,9 +36,6 @@
       <a href="#qual-vs" class="nav-link" data-section="qual-vs">vs. Baselines</a>
       <a href="#citation" class="nav-link" data-section="citation">Citation</a>
     </nav>
-    <div class="sidebar-foot">
-      <span class="venue-badge">NeurIPS 2026 · Under Review</span>
-    </div>
   </aside>
 
   <!-- ============================== MAIN ============================== -->
@@ -99,10 +96,14 @@
         <p>
           <strong class="hl">Lip Forcing</strong> is the first streaming
           diffusion model for V2V lip synchronization. It distills a
-          <strong>14B bidirectional teacher</strong> into a
-          <strong>two-step causal student</strong>, reaching
-          <strong class="hl">31 FPS</strong> real-time on a single GPU —
-          a <strong>4.6×</strong> speedup over LatentSync at comparable fidelity.
+          <strong>14B bidirectional teacher</strong> into two-step causal
+          students at 1.3B and 14B scales. The
+          <strong class="hl">1.3B student</strong> runs
+          <strong>17.6×</strong> faster than its same-scale bidirectional
+          counterpart, and the <strong class="hl">14B student</strong> runs
+          <strong>39.7×</strong> faster than its teacher at comparable
+          reference fidelity — reaching <strong>31 FPS</strong> real-time on
+          a single GPU (H100).
         </p>
       </div>
 
@@ -110,19 +111,19 @@
       <div class="stat-strip">
         <div class="stat-card">
           <div class="stat-num">31<span class="stat-unit"> FPS</span></div>
-          <div class="stat-label">Real-time on single GPU</div>
+          <div class="stat-label">Real-time on a single H100</div>
         </div>
         <div class="stat-card">
           <div class="stat-num">2<span class="stat-unit"> steps</span></div>
           <div class="stat-label">At inference, no CFG</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">4.6<span class="stat-unit">×</span></div>
-          <div class="stat-label">Throughput vs. LatentSync</div>
+          <div class="stat-num">17.6<span class="stat-unit">×</span></div>
+          <div class="stat-label">1.3B causal vs. same-scale bidirectional</div>
         </div>
         <div class="stat-card">
-          <div class="stat-num">14<span class="stat-unit"> B</span></div>
-          <div class="stat-label">Largest V2V lip-sync model</div>
+          <div class="stat-num">39.7<span class="stat-unit">×</span></div>
+          <div class="stat-label">14B student vs. its teacher</div>
         </div>
       </div>
     </section>
@@ -240,7 +241,7 @@
 
     <!-- ============== RESULTS ============== -->
     <section id="results" class="sec">
-      <div class="sec-label">EVALUATION</div>
+      <div class="sec-label">RESULTS</div>
       <h2 class="sec-heading">Quantitative results</h2>
       <p class="sec-lead">
         Main comparison on HDTF. Throughput on a single H100. Best in
@@ -382,7 +383,7 @@
 
     <!-- ============== QUALITATIVE vs BASELINES ============== -->
     <section id="qual-vs" class="sec">
-      <div class="sec-label">COMPARISON</div>
+      <div class="sec-label">VS. BASELINES</div>
       <h2 class="sec-heading">Comparison with baselines</h2>
 
       <!-- Row picker + Magnifier toggle -->

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lip Forcing — Few-Step Streaming Diffusion for Real-time Lip Synchronization</title>
-<meta name="description" content="Lip Forcing: the first streaming diffusion model for V2V lip synchronization. 31 FPS real-time on a single GPU.">
+<title>Lip Forcing — Few-Step Autoregressive Diffusion for Real-time Lip Synchronization</title>
+<meta name="description" content="Lip Forcing: the first autoregressive diffusion model for V2V lip synchronization. 31 FPS real-time on a single GPU.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,7 +48,7 @@
       <div class="hero-head">
         <h1 class="hero-title">
           <span class="hero-accent">Lip Forcing</span><span class="hero-sep">:</span><br>
-          <span class="hero-sub">Few-Step Streaming Diffusion<br>for Real-time Lip Synchronization</span>
+          <span class="hero-sub">Few-Step Autoregressive Diffusion<br>for Real-time Lip Synchronization</span>
         </h1>
 
         <div class="authors-grid">
@@ -94,7 +94,7 @@
       <div class="tldr">
         <strong class="tldr-tag">TL;DR</strong>
         <p>
-          <strong class="hl">Lip Forcing</strong> is the first streaming
+          <strong class="hl">Lip Forcing</strong> is the first autoregressive
           diffusion model for V2V lip synchronization. It distills a
           <strong>14B bidirectional teacher</strong> into two-step causal
           students at 1.3B and 14B scales. The
@@ -186,7 +186,7 @@
           The 14B bidirectional teacher provides velocity targets along a
           windowed schedule (<strong>Sync-Window DMD</strong>), while the causal
           student uses chunk-wise sliding-window attention
-          (<code>sink=1, window=7</code>) to support streaming inference at
+          (<code>sink=1, window=7</code>) to support autoregressive inference at
           deployment. Trained this way, both Lip Forcing variants land on the
           upper-right corner of the <strong class="hl">speed–quality Pareto
           frontier</strong>: the 1.3B student reaches&nbsp;<strong>31 FPS</strong>
@@ -690,7 +690,7 @@
       <h2 class="sec-heading">BibTeX</h2>
       <div class="bib-wrap">
         <pre class="bib"><code>@inproceedings{lipforcing2026,
-  title     = {Lip Forcing: Few-Step Streaming Diffusion for Real-time Lip Synchronization},
+  title     = {Lip Forcing: Few-Step Autoregressive Diffusion for Real-time Lip Synchronization},
   author    = {Anonymous Authors},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
   year      = {2026},

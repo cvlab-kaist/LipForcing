@@ -107,33 +107,80 @@
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
   fadeTargets.forEach(t => fadeObserver.observe(t));
 
-  // ---------- VS-baselines sample picker ----------
+  // ---------- VS-baselines testset arrows + sample picker ----------
+  // The vs-stage contains 9 panels: 3 testsets × 3 samples. Only the panel
+  // matching (currentTestset, currentSample) is visible at any time.
+  const TESTSETS = ['talkvid', 'hdtf', 'hallo3'];
+  const TESTSET_LABELS = { talkvid: 'TalkVid', hdtf: 'HDTF', hallo3: 'Hallo3' };
+  let currentTestset = 'talkvid';
+  let currentSample  = '1';
+
   const pickButtons = document.querySelectorAll('.vs-pick-btn');
   const gridPanels  = document.querySelectorAll('.vs-grid-panel');
-  if(pickButtons.length && gridPanels.length){
-    pickButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const row = btn.dataset.row;
-        // Update buttons
-        pickButtons.forEach(b => {
-          const isActive = b.dataset.row === row;
-          b.classList.toggle('active', isActive);
-          b.setAttribute('aria-selected', String(isActive));
+  const tsetPrev    = document.getElementById('vs-tset-prev');
+  const tsetNext    = document.getElementById('vs-tset-next');
+  const tsetName    = document.getElementById('vs-tset-name');
+  const capTset     = document.getElementById('vs-cap-tset');
+
+  function showActivePanel(){
+    gridPanels.forEach(p => {
+      const match = p.dataset.testset === currentTestset
+                 && p.dataset.row     === currentSample;
+      if(match){
+        p.removeAttribute('hidden');
+      }else{
+        p.setAttribute('hidden', '');
+        p.querySelectorAll('video').forEach(v => {
+          try{ v.pause(); }catch(e){}
         });
-        // Show/hide panels + pause videos in hidden panels
-        gridPanels.forEach(p => {
-          if(p.dataset.row === row){
-            p.removeAttribute('hidden');
-          }else{
-            p.setAttribute('hidden', '');
-            p.querySelectorAll('video').forEach(v => {
-              try{ v.pause(); }catch(e){}
-            });
-          }
-        });
-      });
+      }
     });
   }
+
+  function updateSampleButtons(){
+    pickButtons.forEach(b => {
+      const isActive = b.dataset.row === currentSample;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-selected', String(isActive));
+    });
+  }
+
+  function updateTestsetUi(){
+    if(tsetName){
+      tsetName.classList.add('changing');
+      setTimeout(() => {
+        tsetName.textContent = TESTSET_LABELS[currentTestset];
+        tsetName.classList.remove('changing');
+      }, 90);
+    }
+    if(capTset){
+      capTset.textContent = TESTSET_LABELS[currentTestset];
+    }
+  }
+
+  function cycleTestset(direction){
+    const idx = TESTSETS.indexOf(currentTestset);
+    const next = TESTSETS[(idx + direction + TESTSETS.length) % TESTSETS.length];
+    if(next === currentTestset) return;
+    currentTestset = next;
+    updateTestsetUi();
+    showActivePanel();
+  }
+
+  if(tsetPrev) tsetPrev.addEventListener('click', () => cycleTestset(-1));
+  if(tsetNext) tsetNext.addEventListener('click', () => cycleTestset(+1));
+
+  pickButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.dataset.row;
+      if(row === currentSample) return;
+      currentSample = row;
+      updateSampleButtons();
+      showActivePanel();
+    });
+  });
+
+  // Initial state already matches the markup (TalkVid + Sample 1 visible).
 
   // ---------- VS-baselines magnifier (toggle-gated, offset, controls-aware) ----------
   // Lens shows a zoomed view of the area UNDER the cursor, but the lens itself

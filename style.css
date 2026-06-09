@@ -606,6 +606,68 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
 
 /* =============== VS-BASELINES — sample picker + 3×2 grid =============== */
 
+/* Testset arrow nav — sits above the sample picker.
+   [◀]  Test Set / TalkVid  [▶] */
+.vs-testset-nav{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin: 10px 0 18px;
+}
+.vs-tset-arrow{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--accent-strong);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  padding: 0;
+}
+.vs-tset-arrow:hover{
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #fff;
+  border-color: var(--accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-1);
+}
+.vs-tset-arrow:active{ transform: none; }
+.vs-tset-arrow svg{ display: block; }
+.vs-tset-display{
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 12px;
+}
+.vs-tset-label{
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  line-height: 1;
+}
+.vs-tset-name{
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.vs-tset-name.changing{
+  opacity: 0;
+  transform: translateY(-2px);
+}
+
 /* Top control row: sample picker on the left, magnifier toggle on the right */
 .vs-controls{
   display: flex;
@@ -826,6 +888,10 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
   .vs-grid-panel{ grid-template-columns: 1fr; }
   .vs-pick-btn{ padding: 8px 14px; font-size: 0.86rem; }
   .vs-controls{ flex-direction: column; align-items: flex-start; gap: 12px; }
+  .vs-testset-nav{ gap: 10px; }
+  .vs-tset-arrow{ width: 38px; height: 38px; }
+  .vs-tset-display{ min-width: 120px; padding: 4px 6px; }
+  .vs-tset-name{ font-size: 1.15rem; }
 }
 /* Magnifier is desktop-only */
 @media (hover: none){

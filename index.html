@@ -395,17 +395,24 @@
         comparison.
       </p>
 
-      <!-- Row picker -->
-      <div class="vs-picker" role="tablist" aria-label="Choose a sample">
-        <button class="vs-pick-btn active" data-row="1" role="tab" aria-selected="true">
-          <span class="vs-pick-num">01</span><span class="vs-pick-text">Sample 1</span>
-        </button>
-        <button class="vs-pick-btn" data-row="2" role="tab" aria-selected="false">
-          <span class="vs-pick-num">02</span><span class="vs-pick-text">Sample 2</span>
-        </button>
-        <button class="vs-pick-btn" data-row="3" role="tab" aria-selected="false">
-          <span class="vs-pick-num">03</span><span class="vs-pick-text">Sample 3</span>
-        </button>
+      <!-- Row picker + Magnifier toggle -->
+      <div class="vs-controls">
+        <div class="vs-picker" role="tablist" aria-label="Choose a sample">
+          <button class="vs-pick-btn active" data-row="1" role="tab" aria-selected="true">
+            <span class="vs-pick-num">01</span><span class="vs-pick-text">Sample 1</span>
+          </button>
+          <button class="vs-pick-btn" data-row="2" role="tab" aria-selected="false">
+            <span class="vs-pick-num">02</span><span class="vs-pick-text">Sample 2</span>
+          </button>
+          <button class="vs-pick-btn" data-row="3" role="tab" aria-selected="false">
+            <span class="vs-pick-num">03</span><span class="vs-pick-text">Sample 3</span>
+          </button>
+        </div>
+        <label class="vs-zoom-toggle" title="Show a magnified loupe near the cursor">
+          <input type="checkbox" id="vs-zoom-input">
+          <span class="vs-zoom-slider" aria-hidden="true"></span>
+          <span class="vs-zoom-label">Magnifier</span>
+        </label>
       </div>
 
       <!-- 3×2 grid panels — one per sample, only the active one is shown.

@@ -135,6 +135,147 @@
     });
   }
 
+  // ---------- VS-baselines magnifier (toggle-gated, offset, controls-aware) ----------
+  // Lens shows a zoomed view of the area UNDER the cursor, but the lens itself
+  // sits OFFSET from the cursor (upper-right by default, flipped near viewport
+  // edges) so the cursor target stays visible. The lens also dodges the bottom
+  // ~50px of the hovered cell so it never covers the video controls strip
+  // (play/pause/scrub/mute/fullscreen).
+  if(!matchMedia('(hover: none)').matches){
+    const LENS    = 220;     // lens side length (px)
+    const ZOOM    = 2.5;     // magnification multiplier
+    const OFFSET  = 24;      // gap between cursor and the nearest lens edge
+    const MARGIN  = 10;      // keep this far from viewport edges
+    const CTRL_H  = 50;      // height of the video controls strip (px)
+
+    // Build the lens once
+    const lens = document.createElement('div');
+    lens.className = 'vs-lens';
+    lens.setAttribute('aria-hidden', 'true');
+    const inner = document.createElement('video');
+    inner.muted = true;
+    inner.loop = true;
+    inner.playsInline = true;
+    inner.preload = 'auto';
+    lens.appendChild(inner);
+    const badge = document.createElement('span');
+    badge.className = 'vs-lens-badge';
+    badge.textContent = '×' + ZOOM;
+    lens.appendChild(badge);
+    lens.style.width  = LENS + 'px';
+    lens.style.height = LENS + 'px';
+    document.body.appendChild(lens);
+    window.__vsLens = lens;
+
+    // Toggle wiring
+    const toggle = document.getElementById('vs-zoom-input');
+    let enabled = false;
+    function setEnabled(on){
+      enabled = !!on;
+      document.querySelectorAll('.vs-cell').forEach(c => {
+        c.classList.toggle('vs-cell-zoomable', enabled);
+      });
+      if(!enabled){
+        lens.classList.remove('visible');
+        try{ inner.pause(); }catch(e){}
+      }
+    }
+    if(toggle){
+      toggle.addEventListener('change', () => setEnabled(toggle.checked));
+    }
+
+    let currentSrc = '';
+
+    // Compute lens (x,y) given cursor position + the hovered cell's rect
+    function placeLens(cx, cy, cellRect){
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const candidates = [
+        // [x, y]  — upper-right, lower-right, upper-left, lower-left of cursor
+        [cx + OFFSET,            cy - OFFSET - LENS],
+        [cx + OFFSET,            cy + OFFSET],
+        [cx - OFFSET - LENS,     cy - OFFSET - LENS],
+        [cx - OFFSET - LENS,     cy + OFFSET],
+      ];
+      // Bottom 50px of the hovered cell holds the video controls — treat as
+      // a no-fly zone for the lens rectangle.
+      const ctrlTop = cellRect.bottom - CTRL_H;
+      function overlapsCtrls(x, y){
+        const lensRight  = x + LENS;
+        const lensBottom = y + LENS;
+        return (lensRight > cellRect.left && x < cellRect.right
+                && lensBottom > ctrlTop   && y < cellRect.bottom);
+      }
+      function inViewport(x, y){
+        return x >= MARGIN && y >= MARGIN
+            && x + LENS <= vw - MARGIN
+            && y + LENS <= vh - MARGIN;
+      }
+      // Pick the first candidate that's fully in-viewport AND clear of the
+      // controls strip.
+      for(const [x, y] of candidates){
+        if(inViewport(x, y) && !overlapsCtrls(x, y)) return { x, y };
+      }
+      // Fallback: clamp the first candidate to viewport, then push above the
+      // controls strip if it still collides.
+      let [x, y] = candidates[0];
+      x = Math.max(MARGIN, Math.min(vw - LENS - MARGIN, x));
+      y = Math.max(MARGIN, Math.min(vh - LENS - MARGIN, y));
+      if(overlapsCtrls(x, y)){
+        const lifted = ctrlTop - LENS - 6;
+        if(lifted >= MARGIN) y = lifted;
+      }
+      return { x, y };
+    }
+
+    function onMove(e){
+      if(!enabled){ lens.classList.remove('visible'); return; }
+      const cell = e.currentTarget;
+      const srcVid = cell.querySelector('video');
+      if(!srcVid){ lens.classList.remove('visible'); return; }
+      const rect = srcVid.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      if(x < 0 || y < 0 || x > rect.width || y > rect.height){
+        lens.classList.remove('visible'); return;
+      }
+      // Sync source + play state
+      const desiredSrc = srcVid.currentSrc || srcVid.src;
+      if(currentSrc !== desiredSrc){ currentSrc = desiredSrc; inner.src = desiredSrc; }
+      if(srcVid.paused){
+        if(!inner.paused) inner.pause();
+        inner.currentTime = srcVid.currentTime;
+      }else{
+        if(inner.paused){
+          inner.currentTime = srcVid.currentTime;
+          inner.play().catch(()=>{});
+        }
+        if(Math.abs(inner.currentTime - srcVid.currentTime) > 0.3){
+          inner.currentTime = srcVid.currentTime;
+        }
+      }
+      // Position the lens (offset from cursor, controls-aware)
+      const { x: lx, y: ly } = placeLens(e.clientX, e.clientY, cell.getBoundingClientRect());
+      lens.style.transform = `translate(${lx}px, ${ly}px)`;
+      // Position the inner video so the magnified region matches the cursor
+      const w = rect.width  * ZOOM;
+      const h = rect.height * ZOOM;
+      inner.style.width  = w + 'px';
+      inner.style.height = h + 'px';
+      inner.style.transform = `translate(${-(x * ZOOM - LENS/2)}px, ${-(y * ZOOM - LENS/2)}px)`;
+      lens.classList.add('visible');
+    }
+    function onLeave(){
+      lens.classList.remove('visible');
+      try{ inner.pause(); }catch(e){}
+    }
+
+    document.querySelectorAll('.vs-cell').forEach(cell => {
+      cell.addEventListener('mousemove', onMove);
+      cell.addEventListener('mouseleave', onLeave);
+    });
+  }
+
   // ---------- VS-baselines synchronized playback ----------
   // All 6 videos within a single .vs-grid-panel play / pause / seek as one.
   // Each panel is independent so the 3 samples don't bleed into each other.

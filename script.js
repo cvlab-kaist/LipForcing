@@ -185,6 +185,7 @@
     }
 
     let currentSrc = '';
+    let currentSrcVid = null;   // direct reference to whichever .vs-cell video the lens is mirroring
 
     // Compute lens (x,y) given cursor position + the hovered cell's rect
     function placeLens(cx, cy, cellRect){
@@ -241,7 +242,13 @@
       }
       // Sync source + play state
       const desiredSrc = srcVid.currentSrc || srcVid.src;
-      if(currentSrc !== desiredSrc){ currentSrc = desiredSrc; inner.src = desiredSrc; }
+      if(currentSrc !== desiredSrc){
+        currentSrc = desiredSrc;
+        currentSrcVid = srcVid;
+        inner.src = desiredSrc;
+      }else{
+        currentSrcVid = srcVid;
+      }
       if(srcVid.paused){
         if(!inner.paused) inner.pause();
         inner.currentTime = srcVid.currentTime;
@@ -276,27 +283,35 @@
     });
 
     // Mirror the source video's play / pause / seek into the inner lens video
-    // EVEN WHEN THE MOUSE IS STILL. Without this, the lens content kept
-    // playing whenever the source got paused via the controls without moving
-    // the cursor (the only previous sync hook was inside onMove).
+    // EVEN WHEN THE MOUSE IS STILL. Without this, the lens kept playing when
+    // the source got paused via the controls without moving the cursor.
     document.querySelectorAll('.vs-cell video').forEach(v => {
-      const matchesLensSource = () => (v.currentSrc || v.src) === currentSrc;
-
       v.addEventListener('pause', () => {
-        if(!matchesLensSource()) return;
+        if(v !== currentSrcVid) return;
         try{ inner.pause(); }catch(e){}
         inner.currentTime = v.currentTime;
       });
       v.addEventListener('play', () => {
-        if(!matchesLensSource() || !enabled) return;
+        if(v !== currentSrcVid || !enabled) return;
         inner.currentTime = v.currentTime;
         inner.play().catch(()=>{});
       });
       v.addEventListener('seeking', () => {
-        if(!matchesLensSource()) return;
+        if(v !== currentSrcVid) return;
         inner.currentTime = v.currentTime;
       });
     });
+
+    // SAFETY NET: poll every 100ms. If the source paused but the inner
+    // somehow kept playing (race condition, missed event, browser quirk),
+    // force a pause within a single tick. Cheap — runs only when there's
+    // an active source and the toggle is on.
+    setInterval(() => {
+      if(!enabled || !currentSrcVid) return;
+      if(currentSrcVid.paused && !inner.paused){
+        try{ inner.pause(); }catch(e){}
+      }
+    }, 100);
   }
 
   // ---------- VS-baselines synchronized playback ----------

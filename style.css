@@ -718,6 +718,48 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
   background: linear-gradient(180deg, var(--accent-soft), var(--surface));
 }
 
+/* Hover cursor inside a cell to hint at the magnifier */
+.vs-cell{ cursor: crosshair; }
+
+/* Magnifier "loupe" — singleton, follows the mouse over any vs-cell video */
+.vs-lens{
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 12px 32px rgba(87, 51, 201, 0.32),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 9999;
+  background: #000;
+  opacity: 0;
+  transition: opacity 0.14s ease;
+  will-change: transform, opacity;
+}
+.vs-lens.visible{ opacity: 1; }
+.vs-lens video{
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  object-fit: cover;
+  will-change: transform;
+}
+.vs-lens .vs-lens-badge{
+  position: absolute;
+  right: 6px; bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: white;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 8px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
 /* Responsive: 2 cols on mid, 1 col on small */
 @media (max-width: 900px){
   .vs-grid-panel{ grid-template-columns: repeat(2, 1fr); }
@@ -725,6 +767,10 @@ code{ font-family:var(--font-mono); font-size:0.92em; background:var(--surface-2
 @media (max-width: 560px){
   .vs-grid-panel{ grid-template-columns: 1fr; }
   .vs-pick-btn{ padding: 8px 14px; font-size: 0.86rem; }
+}
+/* Disable lens on touch devices */
+@media (hover: none){
+  .vs-cell{ cursor: pointer; }
 }
 
 /* =============== BIBTEX =============== */

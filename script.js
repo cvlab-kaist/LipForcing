@@ -131,7 +131,99 @@
             });
           }
         });
+        // Hide the magnifier whenever the panel swaps
+        if(window.__vsLens) window.__vsLens.classList.remove('visible');
       });
+    });
+  }
+
+  // ---------- VS-baselines magnifier (loupe) ----------
+  // One shared lens element follows the mouse. Inside it, a cloned video
+  // mirrors whichever .vs-cell video is currently being hovered, scaled up
+  // to give a magnified view of the region under the cursor.
+  if(!matchMedia('(hover: none)').matches){
+    const LENS = 200;        // lens square size in px
+    const ZOOM = 2.5;        // magnification multiplier
+
+    const lens = document.createElement('div');
+    lens.className = 'vs-lens';
+    lens.setAttribute('aria-hidden', 'true');
+    const inner = document.createElement('video');
+    inner.muted = true;
+    inner.loop = true;
+    inner.playsInline = true;
+    inner.preload = 'auto';
+    lens.appendChild(inner);
+    const badge = document.createElement('span');
+    badge.className = 'vs-lens-badge';
+    badge.textContent = '×' + ZOOM;
+    lens.appendChild(badge);
+    document.body.appendChild(lens);
+    window.__vsLens = lens;
+
+    lens.style.width  = LENS + 'px';
+    lens.style.height = LENS + 'px';
+
+    let currentSrc = '';
+
+    function onMove(e){
+      const cell = e.currentTarget;
+      const srcVid = cell.querySelector('video');
+      if(!srcVid){ lens.classList.remove('visible'); return; }
+
+      const rect = srcVid.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Outside the video area? hide.
+      if(x < 0 || y < 0 || x > rect.width || y > rect.height){
+        lens.classList.remove('visible');
+        return;
+      }
+
+      // Match the lens content to the hovered video
+      const desiredSrc = srcVid.currentSrc || srcVid.src;
+      if(currentSrc !== desiredSrc){
+        currentSrc = desiredSrc;
+        inner.src = desiredSrc;
+      }
+
+      // Mirror play state + currentTime (resync if drift > 0.3s)
+      if(srcVid.paused){
+        if(!inner.paused) inner.pause();
+        inner.currentTime = srcVid.currentTime;
+      }else{
+        if(inner.paused){
+          inner.currentTime = srcVid.currentTime;
+          inner.play().catch(()=>{});
+        }
+        if(Math.abs(inner.currentTime - srcVid.currentTime) > 0.3){
+          inner.currentTime = srcVid.currentTime;
+        }
+      }
+
+      // Position lens at the cursor (fixed positioning, no scroll math needed)
+      lens.style.transform = `translate(${e.clientX - LENS/2}px, ${e.clientY - LENS/2}px)`;
+
+      // Size the inner video to ZOOM × the source video's displayed size,
+      // then translate it so the magnified point matches the cursor
+      const w = rect.width  * ZOOM;
+      const h = rect.height * ZOOM;
+      inner.style.width  = w + 'px';
+      inner.style.height = h + 'px';
+      inner.style.transform = `translate(${-(x * ZOOM - LENS/2)}px, ${-(y * ZOOM - LENS/2)}px)`;
+
+      lens.classList.add('visible');
+    }
+
+    function onLeave(){
+      lens.classList.remove('visible');
+      try{ inner.pause(); }catch(e){}
+    }
+
+    document.querySelectorAll('.vs-cell').forEach(cell => {
+      cell.addEventListener('mousemove', onMove);
+      cell.addEventListener('mouseleave', onLeave);
     });
   }
 

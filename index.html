@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lip Forcing — Few-Step Streaming Diffusion for Real-time Lip Synchronization</title>
+<meta name="description" content="Lip Forcing: the first streaming diffusion model for V2V lip synchronization. 31 FPS real-time on a single GPU.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Reading-progress bar -->
+<div id="progress-bar"></div>
+
+<div class="layout">
+
+  <!-- ============================== SIDEBAR ============================== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-mark">LF</span>
+      <span class="brand-name">Lip Forcing</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#hero" class="nav-link" data-section="hero">Overview</a>
+      <a href="#main-video" class="nav-link" data-section="main-video">Demo</a>
+      <a href="#motivation" class="nav-link" data-section="motivation">Motivation</a>
+      <a href="#method" class="nav-link" data-section="method">Method</a>
+      <a href="#results" class="nav-link" data-section="results">Results</a>
+      <a href="#speed-demo" class="nav-link" data-section="speed-demo">Speed demo</a>
+      <a href="#qual-ours" class="nav-link" data-section="qual-ours">Qualitative</a>
+      <a href="#qual-vs" class="nav-link" data-section="qual-vs">vs. Baselines</a>
+      <a href="#citation" class="nav-link" data-section="citation">Citation</a>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="venue-badge">NeurIPS 2026 · Under Review</span>
+    </div>
+  </aside>
+
+  <!-- ============================== MAIN ============================== -->
+  <main class="content">
+
+    <!-- ============== HERO ============== -->
+    <section id="hero" class="sec hero">
+
+      <!-- Centered title / authors / links block -->
+      <div class="hero-head">
+        <h1 class="hero-title">
+          <span class="hero-accent">Lip Forcing</span><span class="hero-sep">:</span><br>
+          <span class="hero-sub">Few-Step Streaming Diffusion<br>for Real-time Lip Synchronization</span>
+        </h1>
+
+        <div class="authors-grid">
+          <div class="author-card"><span class="author-name">Anonymous Author 1</span><sup>1</sup></div>
+          <div class="author-card"><span class="author-name">Anonymous Author 2</span><sup>1</sup></div>
+          <div class="author-card"><span class="author-name">Anonymous Author 3</span><sup>1</sup></div>
+          <div class="author-card"><span class="author-name">Anonymous Author 4</span><sup>2</sup></div>
+        </div>
+        <p class="affil-legend">
+          <sup>1</sup>Affiliation A &nbsp;&nbsp;·&nbsp;&nbsp;
+          <sup>2</sup>Affiliation B
+        </p>
+
+        <div class="links-row">
+          <a href="#" class="link-btn" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>Paper</span>
+          </a>
+          <a href="#" class="link-btn" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 18 22 12 16 6"></polyline>
+              <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+            <span>Code</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- MAIN VIDEO — the hero element. Replaces the static teaser. -->
+      <div id="main-video" class="video-frame video-hero" data-empty="true">
+        <video controls preload="metadata" poster="assets/teaser.png">
+          <source src="videos/main_demo.mp4" type="video/mp4">
+        </video>
+        <div class="placeholder-overlay">
+          <span class="placeholder-pill">Place your concatenated demo at <code>videos/main_demo.mp4</code></span>
+        </div>
+      </div>
+
+      <!-- TL;DR -->
+      <div class="tldr">
+        <strong class="tldr-tag">TL;DR</strong>
+        <p>
+          <strong class="hl">Lip Forcing</strong> is the first streaming
+          diffusion model for V2V lip synchronization. It distills a
+          <strong>14B bidirectional teacher</strong> into a
+          <strong>two-step causal student</strong>, reaching
+          <strong class="hl">31 FPS</strong> real-time on a single GPU —
+          a <strong>4.6×</strong> speedup over LatentSync at comparable fidelity.
+        </p>
+      </div>
+
+      <!-- Stat strip — unique feature: glance-card row -->
+      <div class="stat-strip">
+        <div class="stat-card">
+          <div class="stat-num">31<span class="stat-unit"> FPS</span></div>
+          <div class="stat-label">Real-time on single GPU</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">2<span class="stat-unit"> steps</span></div>
+          <div class="stat-label">At inference, no CFG</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">4.6<span class="stat-unit">×</span></div>
+          <div class="stat-label">Throughput vs. LatentSync</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">14<span class="stat-unit"> B</span></div>
+          <div class="stat-label">Largest V2V lip-sync model</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== MOTIVATION ============== -->
+    <section id="motivation" class="sec">
+      <div class="sec-label">MOTIVATION</div>
+      <h2 class="sec-heading">The fidelity–sync tradeoff</h2>
+
+      <figure class="figure-wide">
+        <img src="assets/combined_analysis.png" alt="CFG fidelity-sync tradeoff: full trajectory analysis and 2x2 schedule factorial">
+        <figcaption>
+          <strong>(a)</strong> Along the full 50-step trajectory of the 14B teacher,
+          classifier-free guidance (CFG, red) improves audio-visual sync but
+          worsens reference fidelity. No-CFG (navy) shows the inverse.
+          No fixed CFG scale optimizes both axes.
+          <strong>(b)</strong> An Euler-jump 2×2 factorial over schedules
+          $(s_0, s_1)$ shows that mixed schedules recover most of the sync gap
+          when the second step lands near $j\!=\!30$.
+        </figcaption>
+      </figure>
+
+      <div class="text-block text-block-wide">
+        <p>
+          Diffusion lip-sync models exhibit a <strong>CFG fidelity-sync tradeoff</strong>:
+          classifier-free guidance lifts audio-visual synchronization but at the cost
+          of reference fidelity, and the two regimes do not coexist at any single CFG
+          scale. To distill this into a two-step student we run an Euler-jump factorial
+          over $(s_0, s_1)\in\{1.0, 4.5\}^2$; the <strong>no-CFG&nbsp;→&nbsp;CFG</strong>
+          schedule lands near <strong class="hl">t&thinsp;=&thinsp;0.769</strong>
+          (~ODE step&nbsp;30) on a favorable point — reference fidelity matched to the
+          CFG=1.0 ceiling and sync within ~0.4 Sync-C of the CFG=4.5 ceiling.
+          The remaining sync gap is closeable with explicit SyncNet supervision, while
+          the reference cost incurred by a guided first step is not. This selects the
+          <strong>operating point</strong> the student is trained to land on at
+          inference: a single landing at $t\!=\!0.769$ after one no-CFG velocity step
+          from $t\!=\!0.999$.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============== METHOD ============== -->
+    <section id="method" class="sec">
+      <div class="sec-label">METHOD</div>
+      <h2 class="sec-heading">Overall framework</h2>
+
+      <div class="dual-figure">
+        <figure class="dual-fig-item">
+          <div class="dual-fig-tag">Framework</div>
+          <img src="assets/main_arch.png" alt="Lip Forcing architecture — Self-Forcing DMD distillation pipeline">
+        </figure>
+        <figure class="dual-fig-item">
+          <div class="dual-fig-tag">Speed vs. quality</div>
+          <img src="assets/pareto.png" alt="Pareto frontier — Lip Forcing dominates on speed-quality">
+        </figure>
+      </div>
+
+      <div class="text-block text-block-wide">
+        <p>
+          The 14B bidirectional teacher provides velocity targets along a
+          windowed schedule (<strong>Sync-Window DMD</strong>), while the causal
+          student uses chunk-wise sliding-window attention
+          (<code>sink=1, window=7</code>) to support streaming inference at
+          deployment. Trained this way, both Lip Forcing variants land on the
+          upper-right corner of the <strong class="hl">speed–quality Pareto
+          frontier</strong>: the 1.3B student reaches&nbsp;<strong>31 FPS</strong>
+          — past the 25 FPS playback rate of the test videos — while the 14B
+          student delivers a&nbsp;<strong>4.6× throughput gain</strong> over
+          LatentSync at comparable reference fidelity. No prior method occupies
+          the upper-right region; the closest competitors trade off either
+          quality (Wav2Lip, MuseTalk) or speed (LatentSync, OmniAvatar).
+        </p>
+      </div>
+
+      <div class="numbered-list">
+        <div class="num-item">
+          <span class="num-mark">1</span>
+          <div>
+            <strong class="hl">Diffusion Forcing pretraining.</strong>
+            The causal student is first trained on real data with each chunk
+            independently noised at a sampled timestep — establishing a clean
+            conditional prior before distillation.
+          </div>
+        </div>
+        <div class="num-item">
+          <span class="num-mark">2</span>
+          <div>
+            <strong class="hl">Sync-Window DMD distillation.</strong>
+            Standard DMD applies teacher CFG uniformly. We instead gate it to
+            the sync-favoring band, derived from the trajectory analysis
+            (roughly steps&nbsp;$j\!\in\![20,40]$). The student learns when
+            guidance is useful and when it hurts.
+          </div>
+        </div>
+        <div class="num-item">
+          <span class="num-mark">3</span>
+          <div>
+            <strong class="hl">Two-step inference, no CFG.</strong>
+            At deployment, the student runs one no-CFG velocity step from
+            $t\!=\!0.999$ to a landing at $t\!=\!0.769$, then one final
+            denoising step to $t\!=\!0$. No classifier-free guidance is used
+            at inference.
+          </div>
+        </div>
+        <div class="num-item">
+          <span class="num-mark">4</span>
+          <div>
+            <strong class="hl">SyncNet reward.</strong>
+            An explicit SyncNet-based reward closes the residual sync gap
+            identified by the analysis.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== RESULTS ============== -->
+    <section id="results" class="sec">
+      <div class="sec-label">EVALUATION</div>
+      <h2 class="sec-heading">Quantitative results</h2>
+      <p class="sec-lead">
+        Main comparison on HDTF. Throughput on a single H100. Best in
+        <strong>bold</strong>; second-best <u>underlined</u>.
+      </p>
+
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th class="th-left">Method</th>
+              <th>Steps</th>
+              <th>FPS&nbsp;↑</th>
+              <th>TTFF&nbsp;↓</th>
+              <th>Sync-C&nbsp;↑</th>
+              <th>Sync-D&nbsp;↓</th>
+              <th>CSIM&nbsp;↑</th>
+              <th>FID&nbsp;↓</th>
+              <th>FVD&nbsp;↓</th>
+              <th>SSIM&nbsp;↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-gt">
+              <td class="th-left">Ground&nbsp;truth</td>
+              <td>—</td><td>—</td><td>—</td>
+              <td>7.95</td><td>6.92</td>
+              <td>—</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+            <tr class="row-sep"></tr>
+            <tr>
+              <td class="th-left">Wav2Lip</td>
+              <td>—</td><td><strong>479.60</strong></td><td><strong>0.17</strong></td>
+              <td><u>8.56</u></td><td>6.70</td>
+              <td>0.946</td><td>24.15</td><td>384.82</td><td>0.911</td>
+            </tr>
+            <tr>
+              <td class="th-left">VideoReTalking</td>
+              <td>—</td><td>2.67</td><td>3.76</td>
+              <td>8.22</td><td>6.70</td>
+              <td>0.910</td><td>24.59</td><td>306.63</td><td>0.883</td>
+            </tr>
+            <tr>
+              <td class="th-left">MuseTalk</td>
+              <td>1</td><td>23.07</td><td>2.72</td>
+              <td>7.94</td><td>6.95</td>
+              <td><u>0.957</u></td><td>9.68</td><td>127.44</td><td><u>0.943</u></td>
+            </tr>
+            <tr class="row-sep"></tr>
+            <tr>
+              <td class="th-left">Diff2Lip</td>
+              <td>25</td><td>15.47</td><td>5.04</td>
+              <td>8.35</td><td><u>6.32</u></td>
+              <td>0.943</td><td>20.32</td><td>285.69</td><td>0.907</td>
+            </tr>
+            <tr>
+              <td class="th-left">LatentSync</td>
+              <td>20</td><td>3.23</td><td>6.29</td>
+              <td>8.10</td><td>6.51</td>
+              <td><strong>0.967</strong></td><td>6.90</td><td><u>117.91</u></td><td><strong>0.950</strong></td>
+            </tr>
+            <tr>
+              <td class="th-left">X-Dub</td>
+              <td>30</td><td>0.91</td><td>163.64</td>
+              <td>7.58</td><td>7.66</td>
+              <td>0.898</td><td>14.76</td><td>183.99</td><td>0.831</td>
+            </tr>
+            <tr class="row-sep"></tr>
+            <tr>
+              <td class="th-left">OmniAvatar&nbsp;LS (1.3B)</td>
+              <td>50</td><td>1.79</td><td>45.36</td>
+              <td>8.04</td><td>6.99</td>
+              <td>0.927</td><td>8.06</td><td>143.75</td><td>0.904</td>
+            </tr>
+            <tr class="row-sep"></tr>
+            <tr class="row-ours">
+              <td class="th-left"><strong>Lip Forcing (1.3B)</strong></td>
+              <td>2</td><td>—</td><td>—</td>
+              <td>—</td><td>—</td>
+              <td>—</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+            <tr class="row-ours">
+              <td class="th-left"><strong>Lip Forcing (14B)</strong></td>
+              <td>2</td><td>—</td><td>—</td>
+              <td>—</td><td>—</td>
+              <td>—</td><td>—</td><td>—</td><td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap">
+        Dashes in our rows are placeholders. Final values will appear here once the camera-ready
+        numbers are locked. See the Pareto frontier in the
+        <a href="#method">Method</a> section for the speed-quality view of these numbers.
+      </p>
+    </section>
+
+    <!-- ============== SPEED DEMO ============== -->
+    <section id="speed-demo" class="sec">
+      <div class="sec-label">SPEED DEMO</div>
+      <h2 class="sec-heading">Real-time generation, live</h2>
+      <p class="sec-lead">
+        Captured screen recording of the 1.3B model decoding frames as the audio
+        plays. The two-step student streams chunks as they're denoised — there's
+        no full-clip prefill latency.
+      </p>
+
+      <div class="video-frame video-demo" data-empty="true">
+        <video controls preload="metadata" poster="assets/teaser.png">
+          <source src="videos/speed_demo.mp4" type="video/mp4">
+        </video>
+        <div class="placeholder-overlay">
+          <span class="placeholder-pill">Place the screen-cap demo at <code>videos/speed_demo.mp4</code></span>
+        </div>
+      </div>
+
+      <div class="speed-callouts">
+        <div class="callout-card">
+          <div class="callout-num">31&nbsp;<span class="callout-unit">FPS</span></div>
+          <div class="callout-text">crosses the 25 FPS playback rate of the test videos — the model generates frames <strong>faster than they play</strong>.</div>
+        </div>
+        <div class="callout-card">
+          <div class="callout-num">2&nbsp;<span class="callout-unit">steps</span></div>
+          <div class="callout-text">per chunk, no inference-time CFG. Time-to-first-frame is the lowest among all diffusion baselines.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== QUALITATIVE — OURS ONLY ============== -->
+    <section id="qual-ours" class="sec">
+      <div class="sec-label">QUALITATIVE</div>
+      <h2 class="sec-heading">Lip Forcing in action</h2>
+      <p class="sec-lead">
+        Outputs from the 14B model across narration, multilingual, long-duration,
+        and stylized characters.
+      </p>
+
+      <!-- Empty grid — videos will be dropped in -->
+      <div class="video-grid grid-3" id="qual-ours-grid">
+        <!-- Placeholder slots (just visual frames; user adds videos later) -->
+        <figure class="video-frame placeholder-frame">
+          <div class="placeholder-inner"><span>Slot 1</span></div>
+          <figcaption>—</figcaption>
+        </figure>
+        <figure class="video-frame placeholder-frame">
+          <div class="placeholder-inner"><span>Slot 2</span></div>
+          <figcaption>—</figcaption>
+        </figure>
+        <figure class="video-frame placeholder-frame">
+          <div class="placeholder-inner"><span>Slot 3</span></div>
+          <figcaption>—</figcaption>
+        </figure>
+        <figure class="video-frame placeholder-frame">
+          <div class="placeholder-inner"><span>Slot 4</span></div>
+          <figcaption>—</figcaption>
+        </figure>
+        <figure class="video-frame placeholder-frame">
+          <div class="placeholder-inner"><span>Slot 5</span></div>
+          <figcaption>—</figcaption>
+        </figure>
+        <figure class="video-frame placeholder-frame">
+          <div class="placeholder-inner"><span>Slot 6</span></div>
+          <figcaption>—</figcaption>
+        </figure>
+      </div>
+      <p class="cap">
+        Drop your Lip Forcing outputs into <code>videos/qual_ours/</code>
+        and replace each placeholder slot with a <code>&lt;video&gt;</code> element.
+        See <code>README.md</code>.
+      </p>
+    </section>
+
+    <!-- ============== QUALITATIVE vs BASELINES ============== -->
+    <section id="qual-vs" class="sec">
+      <div class="sec-label">COMPARISON</div>
+      <h2 class="sec-heading">Comparison with baselines</h2>
+      <p class="sec-lead">
+        Same input video and driving audio per row. Each column is a different
+        method.
+      </p>
+
+      <!-- Row template — each row uses same input across all baselines -->
+      <div class="vs-table">
+        <!-- Header (column labels) -->
+        <div class="vs-row vs-header">
+          <div class="vs-input-label">Input</div>
+          <div class="vs-cell-label">Wav2Lip</div>
+          <div class="vs-cell-label">VideoReTalking</div>
+          <div class="vs-cell-label">MuseTalk</div>
+          <div class="vs-cell-label">LatentSync</div>
+          <div class="vs-cell-label vs-cell-ours">Ours</div>
+        </div>
+
+        <!-- Row 1 -->
+        <div class="vs-row">
+          <figure class="video-frame placeholder-frame vs-input">
+            <div class="placeholder-inner"><span>Input&nbsp;A</span></div>
+          </figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame vs-cell-ours">
+            <div class="placeholder-inner"><span>Ours</span></div>
+          </figure>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="vs-row">
+          <figure class="video-frame placeholder-frame vs-input">
+            <div class="placeholder-inner"><span>Input&nbsp;B</span></div>
+          </figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame vs-cell-ours">
+            <div class="placeholder-inner"><span>Ours</span></div>
+          </figure>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="vs-row">
+          <figure class="video-frame placeholder-frame vs-input">
+            <div class="placeholder-inner"><span>Input&nbsp;C</span></div>
+          </figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame"><div class="placeholder-inner"><span>—</span></div></figure>
+          <figure class="video-frame placeholder-frame vs-cell-ours">
+            <div class="placeholder-inner"><span>Ours</span></div>
+          </figure>
+        </div>
+      </div>
+      <p class="cap">
+        Drop your videos into <code>videos/vs/&lt;row&gt;/&lt;method&gt;.mp4</code>
+        and uncomment the <code>&lt;source&gt;</code> tags. See <code>README.md</code>.
+      </p>
+    </section>
+
+    <!-- ============== CITATION ============== -->
+    <section id="citation" class="sec">
+      <div class="sec-label">CITATION</div>
+      <h2 class="sec-heading">BibTeX</h2>
+      <div class="bib-wrap">
+        <pre class="bib"><code>@inproceedings{lipforcing2026,
+  title     = {Lip Forcing: Few-Step Streaming Diffusion for Real-time Lip Synchronization},
+  author    = {Anonymous Authors},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026},
+  note      = {Under review}
+}</code></pre>
+        <button class="copy-btn" id="copy-bib" aria-label="Copy BibTeX">Copy</button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Page rendered locally. Source layout adapted from common academic page conventions.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});"
+></script>
+<script src="script.js"></script>
+</body>
+</html>
